@@ -1,0 +1,2 @@
+hadoop jar /svn/damasc/software/hadoop-scidata/branches/sc11_git/build/jar/hadoop-scidata-v2.jar average -D damasc.extraction_shape=1,36,36,10 -D damasc.partition_mode=record -D damasc.placement_mode=sampling -D damasc.query_dependant=false -D damasc.number_reducers=1 -D damasc.variable_name=windspeed1 -D damasc.buffer_size=134217728 -D damasc.logfile=/tmp/damasc_log.txt  1_file/* foo1 
+

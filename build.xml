@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+
+<!--
+   The following environment variables are expected to be set:
+     2) HADOOP_VERSION  := version of hadoop (for hadoop-VERSION-core.jar)
+     3) NETCDF_HOME     := Damasc NetCDF library (e.g.
+   You may have to adjust the names of the Hadoop JAR files listed in the
+   classpath below depending on the version of Hadoop being used.
+-->
+
+<project name="hadoop-scidata" default="main">
+
+  <property name="src.dir" value="src"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="build.dir" value="build"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="jar.dir" value="${build.dir}/jar"/>
+  <property environment="env"/>
+
+  <path id="classpath">
+    <pathelement location="${env.NETCDF_HOME}/netcdfAll-4.2.jar"/>
+    <pathelement location="${env.HADOOP_COMMON_HOME}/build/hadoop-core-${env.HADOOP_VERSION}.jar" />
+  </path>
+
+  <target name="init">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${jar.dir}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac
+      srcdir="${src.dir}"
+      destdir="${classes.dir}"
+      debug="true"
+      includeantruntime="false">
+      <compilerarg value="-Xlint"/>
+      <classpath refid="classpath"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile">
+
+    <!-- flatten classpath first -->
+    <!-- convert classpath to a flat list/string for use in manifest task -->
+    <pathconvert property="myclasspath" pathsep=" ">
+        <path refid="classpath" />
+    </pathconvert>
+
+    <!-- <property name="myclasspath" refid="classpath"/> -->
+    <!-- Emit the property to the ant console -->
+    <echo message="Classpath = ${myclasspath}"/>
+
+    <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="edu.ucsc.srl.damasc.netcdf.NCTool"/> 
+        <attribute name="Class-Path" value="${myclasspath}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="GIDG" depends="compile">
+
+    <!-- flatten classpath first -->
+    <!-- convert classpath to a flat list/string for use in manifest task -->
+    <pathconvert property="myclasspath" pathsep=" ">
+        <path refid="classpath" />
+    </pathconvert>
+
+    <!-- <property name="myclasspath" refid="classpath"/> -->
+    <!-- Emit the property to the ant console -->
+    <!-- <echo message="Classpath = ${myclasspath}"/>  -->
+
+    <jar destfile="${jar.dir}/groupIDGenTest.jar" basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="edu.ucsc.srl.damasc.netcdf.io.GroupIDGen"/> 
+        <attribute name="Class-Path" value="${myclasspath}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="main" depends="clean,jar"/>
+
+</project>
