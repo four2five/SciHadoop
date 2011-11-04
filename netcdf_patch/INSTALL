@@ -1,0 +1,17 @@
+Nov 3, 2011
+Joe Buck ( buck@soe.ucsc.edu)
+
+1) download a source verison of NetCDF 4.2. This patch was built against the package from Oct 24, 2011
+
+2) unzip the NetCDF source somewhere
+
+3) copy the netcdf42.diff file into the same directory as "cdm"
+
+4) patch with this command 'patch -p1 < netcdf42.diff
+
+5) this should apply cleanly. If it does, then cd into the cdm directory and build the jar with this command:
+'ant makeMainComplete'
+
+6) there should now be a directory under 'cdm' called 'target'. The jar file in there called 'netcdfAll-4.2.jar is likely the one you want. You can try using netcdf-4.2.jar but we just use the "All" variant ant it works out pretty well.
+
+7) make sure this jar is in both your CLASSPATH and HADOOP_CLASSPATH (configured in the conf/hadoop-env.sh script in your hadoop installation) for every node. 
