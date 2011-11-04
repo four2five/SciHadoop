@@ -1,2 +1,4 @@
 This represents the code base used to run the experiments for the SC '11 SciHadoop paper. 
 See our website for links to the paper and more details: http://systems.soe.ucsc.edu/projects/damasc
+
+The NetCDF patches need to be applied to a 4.2 version of the NetCDF Java library for the SciHadoop code to work. Directions can be found in the netcdf_patches directory.
