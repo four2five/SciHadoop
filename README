@@ -2,3 +2,8 @@ This represents the code base used to run the experiments for the SC '11 SciHado
 See our website for links to the paper and more details: http://systems.soe.ucsc.edu/projects/damasc
 
 The NetCDF patches need to be applied to a 4.2 version of the NetCDF Java library for the SciHadoop code to work. Directions can be found in the netcdf_patches directory.
+
+Installation instructions can be found on our github page, here https://github.com/four2five/SciHadoop/wiki/How-to-Build-SciHadoop
+That link has instructions for installing Hadoop, patching and building NetCDF and running a SciHadoop job
+
+Questions can be sent to buck@soe.ucsc.edu
