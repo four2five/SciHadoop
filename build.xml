@@ -19,7 +19,7 @@
 
   <path id="classpath">
     <pathelement location="${env.NETCDF_HOME}/netcdfAll-4.2.jar"/>
-    <pathelement location="${env.HADOOP_COMMON_HOME}/build/hadoop-core-${env.HADOOP_VERSION}.jar" />
+    <pathelement location="${env.HADOOP_COMMON_HOME}/hadoop-core-${env.HADOOP_VERSION}.jar" />
   </path>
 
   <target name="init">
