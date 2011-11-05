@@ -1,0 +1,8 @@
+A jar file that generates a valid NetCDF-3 file
+
+To generate a file do the following:
+
+ant jar
+ant run
+
+this will generate a .nc file with the timestamp, in milliseconds since the epoch, being the file name. This should allow using the file name to seed the random number generator as a means of checking the data somewhere down the line.

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+
+<!--
+   The following environment variables are expected to be set:
+     1) HADOOP_HOME     := root of hadoop tree
+     2) HADOOP_VERSION  := version of hadoop (for hadoop-VERSION-core.jar)
+     3) JUNIT_HOME      := junit jars
+     4) NETCDF_HOME     := Damasc NetCDF library (e.g.
+   You may have to adjust the names of the Hadoop JAR files listed in the
+   classpath below depending on the version of Hadoop being used.
+edu/ucsc/srl/tools/NetcdfFileGenerator
+-->
+
+<project name="NetcdfFileGenerator" default="main">
+
+  <property name="src.dir" value="src"/>
+  <property name="build.dir" value="build"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="jar.dir" value="${build.dir}/jar"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="main-class" value="edu.ucsc.srl.tools.NetcdfFileGenerator"/> 
+  <property environment="env"/>
+
+  <path id="classpath">
+    <pathelement location="${env.NETCDF_HOME}/netcdfAll-4.2.jar"/> 
+  </path>
+
+  <target name="init">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${jar.dir}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac
+      srcdir="${src.dir}"
+      destdir="${classes.dir}"
+      debug="true"
+      includeantruntime="false">
+      <compilerarg value="-Xlint"/>
+      <classpath refid="classpath"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile">
+    <!-- flatten classpath first -->
+    <!-- convert classpath to a flat list/string for use in manifest task -->
+    <pathconvert property="myclasspath" pathsep=" ">
+      <path refid="classpath" />
+    </pathconvert>
+
+    <!-- <property name="myclasspath" refid="classpath"/> -->
+    <!-- Emit the property to the ant console -->
+    <echo message="Classpath = ${myclasspath}"/>
+
+    <jar destfile="${jar.dir}/${ant.project.name}.jar" 
+        basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}"/>
+        <attribute name="Class-Path" value="${myclasspath}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+   <target name="run" depends="jar">
+        <java fork="true" classname="${main-class}">
+            <classpath>
+                <path refid="classpath"/>
+                <path id="application" location="${jar.dir}/${ant.project.name}.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+  <target name="main" depends="clean,jar,run"/>
+
+</project>
