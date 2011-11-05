@@ -1,6 +1,6 @@
-diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java
-*** ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java	2011-07-27 11:12:24.000000000 -0700
---- cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java	2011-11-03 22:11:11.844436359 -0700
+diff -b -r -c cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java
+*** cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java	2011-07-27 11:12:24.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java	2011-11-04 17:38:52.494397089 -0700
 ***************
 *** 100,105 ****
 --- 100,115 ----
@@ -20,9 +20,9 @@ diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProv
     public StructureDataIterator getStructureIterator(Structure s, int bufferSize) throws java.io.IOException {
       return null;
     }
-diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java
-*** ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java	2011-11-04 16:45:34.524398882 -0700
---- cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java	2011-11-03 22:11:11.844436359 -0700
+diff -b -r -c cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java
+*** cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java	2011-07-27 11:12:32.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java	2011-11-04 17:34:34.254397234 -0700
 ***************
 *** 124,129 ****
 --- 124,155 ----
@@ -58,21 +58,9 @@ diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.jav
     // iosps with top level sequences must override
     public StructureDataIterator getStructureIterator(Structure s, int bufferSize) throws java.io.IOException;
   
-***************
-*** 192,195 ****
-     */
-    public String getFileTypeDescription();
-  
-! }
-\ No newline at end of file
---- 218,221 ----
-     */
-    public String getFileTypeDescription();
-  
-! }
-diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java
-*** ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java	2011-11-04 16:46:19.734398857 -0700
---- cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java	2011-11-03 22:11:11.844436359 -0700
+diff -b -r -c cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java
+*** cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java	2011-07-27 11:12:30.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java	2011-11-04 17:34:34.284397234 -0700
 ***************
 *** 410,415 ****
 --- 410,483 ----
@@ -216,9 +204,9 @@ diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java c
         writeData(values, layout, dataType);
       }
     }
-diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/NetcdfFile.java cdm//src/main/java/ucar/nc2/NetcdfFile.java
-*** ../orig_netcdf/cdm//src/main/java/ucar/nc2/NetcdfFile.java	2011-11-04 16:47:04.314398832 -0700
---- cdm//src/main/java/ucar/nc2/NetcdfFile.java	2011-11-03 22:11:11.844436359 -0700
+diff -b -r -c cdm//src/main/java/ucar/nc2/NetcdfFile.java ../netcdf2/cdm//src/main/java/ucar/nc2/NetcdfFile.java
+*** cdm//src/main/java/ucar/nc2/NetcdfFile.java	2011-07-27 11:12:34.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/NetcdfFile.java	2011-11-04 17:34:34.224397234 -0700
 ***************
 *** 423,428 ****
 --- 423,432 ----
@@ -274,9 +262,9 @@ diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/NetcdfFile.java cdm//src/m
     //////////////////////////////////////////////////////////////////////////////////////
     // Service Provider calls
     // All IO eventually goes through these calls.
-diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/Variable.java cdm//src/main/java/ucar/nc2/Variable.java
-*** ../orig_netcdf/cdm//src/main/java/ucar/nc2/Variable.java	2011-11-04 16:47:15.724398825 -0700
---- cdm//src/main/java/ucar/nc2/Variable.java	2011-11-03 22:11:11.854436359 -0700
+diff -b -r -c cdm//src/main/java/ucar/nc2/Variable.java ../netcdf2/cdm//src/main/java/ucar/nc2/Variable.java
+*** cdm//src/main/java/ucar/nc2/Variable.java	2011-07-27 11:12:34.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/Variable.java	2011-11-04 17:34:34.104397234 -0700
 ***************
 *** 605,610 ****
 --- 605,644 ----
@@ -320,4 +308,4 @@ diff -r -c ../orig_netcdf/cdm//src/main/java/ucar/nc2/Variable.java cdm//src/mai
      * Read data section specified by a "section selector", and return a memory resident Array. Uses
      * Fortran 90 array section syntax.
      *
-Only in cdm/: target
+Only in ../netcdf2/cdm/: target
