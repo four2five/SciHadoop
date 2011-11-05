@@ -254,8 +254,10 @@ public class NetcdfFileGenerator {
 
                 while( iter.hasNext() ) {
                     iter.getIntNext();
-                    iter.setIntCurrent((int)  (Math.abs(generator.nextGaussian()) * 40) );
-                    //iter.setIntCurrent(valueCounter);
+                    // uncomment the following line for a random distribution
+                    //iter.setIntCurrent((int)  (Math.abs(generator.nextGaussian()) * 40) );
+                    // uncomment this line for an incrementing value
+                    iter.setIntCurrent(valueCounter);
                     valueCounter++;
 
                   // book keeping
