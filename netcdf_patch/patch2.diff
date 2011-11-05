@@ -1,0 +1,311 @@
+diff -b -r -c cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java
+*** cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java	2011-07-27 11:12:24.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/AbstractIOServiceProvider.java	2011-11-04 17:34:34.254397234 -0700
+***************
+*** 100,105 ****
+--- 100,115 ----
+    }
+  
+    @Override
++   public boolean supportsLocalityInformation() throws IOException {
++     throw new IOException("This IOSP does not support getLocalityInformation()");
++   }
++ 
++   @Override
++   public ArrayLong getLocalityInformation(ucar.nc2.Variable v2, Section section) throws IOException, InvalidRangeException {
++     throw new IOException("This IOSP does not support getLocalityInformation()");
++   }
++ 
++   @Override
+    public StructureDataIterator getStructureIterator(Structure s, int bufferSize) throws java.io.IOException {
+      return null;
+    }
+diff -b -r -c cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java
+*** cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java	2011-07-27 11:12:32.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/IOServiceProvider.java	2011-11-04 17:34:34.254397234 -0700
+***************
+*** 124,129 ****
+--- 124,155 ----
+     */
+    public ucar.ma2.Array readSection(ParsedSectionSpec cer) throws IOException, InvalidRangeException;
+  
++   /**
++    * Calculate the offset in the underlying byte-stream for each value
++    * indicated by the section and variable objects
++    *
++    * @param v2 a top-level Variable
++    * @param section the section of data to read.
++    *   There must be a Range for each Dimension in the variable, in order.
++    *   Note: no nulls allowed. IOSP may not modify.
++    * @return an ArrayLong the same shape as section where each entry is the 
++    *         offset of the corresponding data element
++    * @throws java.io.IOException if read error or if this IOSP doesn't 
++    *                             support getLocalityInformation()
++    * @throws ucar.ma2.InvalidRangeException if invalid section
++    */
++   public ucar.ma2.ArrayLong getLocalityInformation(ucar.nc2.Variable v2, Section section) 
++          throws IOException, InvalidRangeException;
++ 
++   /**
++    * Determine if this IOServiceProvider supports the getLocalityInformation() function
++    *
++    * @return a boolean indicating if getLocalityInformation is supported by
++    *         this IOServiceProvider
++    */
++   public boolean supportsLocalityInformation() throws IOException;
++ 
++ 
+    // iosps with top level sequences must override
+    public StructureDataIterator getStructureIterator(Structure s, int bufferSize) throws java.io.IOException;
+  
+diff -b -r -c cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java
+*** cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java	2011-07-27 11:12:30.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/iosp/netcdf3/N3iosp.java	2011-11-04 17:34:34.284397234 -0700
+***************
+*** 410,415 ****
+--- 410,483 ----
+      this.fill = fill;
+    }
+  
++   /**
++    * query to see if this IOSP supports the getLocalityInformation() function
++    *
++    * @return a boolean indicating that this IOSP supports the getLocalityInformation() call
++    */
++   public boolean supportsLocalityInformation() { 
++     return true;
++   }
++ 
++   /**
++    * Returns an ArrayLong with each entry corresponding to the offset in the filestream
++    * of the same data cell in the section arguement to the function
++    *
++    * @param v2 the variable to get the data from
++    * @param section the record range to read
++    * @return an ArrayLong object that's the shape as the section arguement
++    * @throws InvalidRangeException on error
++    * @throws IOException on error
++    */
++   public ArrayLong getLocalityInformation(ucar.nc2.Variable v2, Section section)
++          throws InvalidRangeException, IOException {
++ 
++     // An array to hold the offsets that will be returned
++     ArrayLong array = new ArrayLong(section.getShape());
++ 
++     // Index into the results array
++     Index aIndex = array.getIndex();
++ 
++     // dataSize is used to increment the offsets within a given
++     // chunk appropriately
++     DataType type = v2.getDataType();
++     int dataSize = type.getSize();
++ 
++     Layout layout = getLayout(v2, section);
++ 
++     // iterate over all the chunks in the calculated Layout
++     while( layout.hasNext() ){
++       Layout.Chunk chunk = layout.next();
++ 
++       // iterate over the elements in this chunk
++       for( int i = 0; i < chunk.getNelems(); i++){
++         // write the offset into the results array, then iterate the index
++         array.setLong(aIndex, chunk.getSrcPos() + (i * dataSize));
++         aIndex.incr();
++       }
++     }
++ 
++     return array;
++   }
++ 
++   /**
++    * Returns a Layout object for use by an N3iosp object
++    *
++    * @param v2 the variable to get the layout information for
++    * @param section the record range to read
++    * @return a Layout corresponding to the Section requested
++    * @throws IOException on error
++    */
++   private Layout getLayout(Variable v2, Section section) throws InvalidRangeException {
++     N3header.Vinfo vinfo = (N3header.Vinfo) v2.getSPobject();
++ 
++     Layout layout = (!v2.isUnlimited()) ? new LayoutRegular(vinfo.begin, v2.getElementSize(), v2.getShape(), section) 
++       : new LayoutRegularSegmented(vinfo.begin, v2.getElementSize(), header.recsize, v2.getShape(), section);
++ 
++     return layout;
++   }
++ 
++   /////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // data reading
+  
+***************
+*** 419,427 ****
+  
+      N3header.Vinfo vinfo = (N3header.Vinfo) v2.getSPobject();
+      DataType dataType = v2.getDataType();
+! 
+!     Layout layout = (!v2.isUnlimited()) ? new LayoutRegular(vinfo.begin, v2.getElementSize(), v2.getShape(), section) :
+!       new LayoutRegularSegmented(vinfo.begin, v2.getElementSize(), header.recsize, v2.getShape(), section);
+  
+      if (layout.getTotalNelems() == 0) {
+        return Array.factory(dataType.getPrimitiveClassType(), section.getShape());
+--- 487,493 ----
+  
+      N3header.Vinfo vinfo = (N3header.Vinfo) v2.getSPobject();
+      DataType dataType = v2.getDataType();
+!     Layout layout = getLayout(v2, section);
+  
+      if (layout.getTotalNelems() == 0) {
+        return Array.factory(dataType.getPrimitiveClassType(), section.getShape());
+***************
+*** 565,573 ****
+  
+      N3header.Vinfo vinfo = (N3header.Vinfo) v2.getSPobject();
+      DataType dataType = v2.getDataType();
+! 
+!     Layout layout = (!v2.isUnlimited()) ? new LayoutRegular(vinfo.begin, v2.getElementSize(), v2.getShape(), section) :
+!       new LayoutRegularSegmented(vinfo.begin, v2.getElementSize(), header.recsize, v2.getShape(), section);
+  
+      return readData(layout, dataType, channel);
+    }
+--- 631,637 ----
+  
+      N3header.Vinfo vinfo = (N3header.Vinfo) v2.getSPobject();
+      DataType dataType = v2.getDataType();
+!     Layout layout = getLayout(v2, section);
+  
+      return readData(layout, dataType, channel);
+    }
+***************
+*** 663,669 ****
+  
+    public void writeData(Variable v2, Section section, Array values) throws java.io.IOException, InvalidRangeException {
+  
+-     N3header.Vinfo vinfo = (N3header.Vinfo) v2.getSPobject();
+      DataType dataType = v2.getDataType();
+  
+      if (v2.isUnlimited()) {
+--- 727,732 ----
+***************
+*** 675,682 ****
+        writeRecordData((Structure) v2, section, values);
+  
+      } else {
+!       Layout layout = (!v2.isUnlimited()) ? new LayoutRegular(vinfo.begin, v2.getElementSize(), v2.getShape(), section) :
+!         new LayoutRegularSegmented(vinfo.begin, v2.getElementSize(), header.recsize, v2.getShape(), section);
+        writeData(values, layout, dataType);
+      }
+    }
+--- 738,744 ----
+        writeRecordData((Structure) v2, section, values);
+  
+      } else {
+!       Layout layout = getLayout(v2, section);
+        writeData(values, layout, dataType);
+      }
+    }
+diff -b -r -c cdm//src/main/java/ucar/nc2/NetcdfFile.java ../netcdf2/cdm//src/main/java/ucar/nc2/NetcdfFile.java
+*** cdm//src/main/java/ucar/nc2/NetcdfFile.java	2011-07-27 11:12:34.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/NetcdfFile.java	2011-11-04 17:34:34.224397234 -0700
+***************
+*** 423,428 ****
+--- 423,432 ----
+      return open(location, null);
+    }
+  
++   public static NetcdfFile open(ucar.unidata.io.RandomAccessFile raf, String location) throws IOException {
++     return open(raf, location, null, null);
++   }
++ 
+    /**
+     * Open an existing file (read only), with option of cancelling.
+     *
+***************
+*** 1094,1099 ****
+--- 1098,1116 ----
+    }
+  
+    /**
++    * Return true if this file supports querying for locality information.
++    * @return if the file can return locality information
++    * @throws IOException if there is not an IOServiceProvider set
++    */
++   public boolean supportsLocalityInformation() throws IOException {
++     if (spi == null) {
++       throw new IOException("spi is null");
++     }
++ 
++     return spi.supportsLocalityInformation();
++   }
++ 
++   /**
+     * Return the unlimited (record) dimension, or null if not exist.
+     * If there are multiple unlimited dimensions, it will return the first one.
+     *
+***************
+*** 1834,1839 ****
+--- 1851,1867 ----
+      return sbuff.toString();
+    }
+  
++   public ArrayLong getLocalityInformation(ucar.nc2.Variable v, Section ranges) 
++          throws IOException, InvalidRangeException {
++     if (spi == null) {
++       throw new IOException("spi is null");
++     } else if (!spi.supportsLocalityInformation()) { 
++       throw new IOException("IOSP " + spi.getFileTypeId() + " does not support getLocalityInformation()");
++     }
++ 
++     return spi.getLocalityInformation(v, ranges);
++   }
++ 
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Service Provider calls
+    // All IO eventually goes through these calls.
+diff -b -r -c cdm//src/main/java/ucar/nc2/Variable.java ../netcdf2/cdm//src/main/java/ucar/nc2/Variable.java
+*** cdm//src/main/java/ucar/nc2/Variable.java	2011-07-27 11:12:34.000000000 -0700
+--- ../netcdf2/cdm//src/main/java/ucar/nc2/Variable.java	2011-11-04 17:34:34.104397234 -0700
+***************
+*** 605,610 ****
+--- 605,644 ----
+    }
+  
+    /**
++    * Return an ArrayLong structure with the same shape as the shape arguement
++    * where each entry is the offset in the byte-stream where the corresponding
++    * data element begins
++    * @param origin int array specifying the starting index. If null, assume all zeroes.
++    * @param shape  int array specifying the extents in each dimension.
++    *               This becomes the shape of the returned Array.
++    * @return a memory-resdient array of longs with offsets or -1 if the offset
++    *                for the corresponding cell can't be determined
++    */
++   public ArrayLong getLocalityInformation(int[] origin, int[] shape) throws IOException, InvalidRangeException {
++     return ncfile.getLocalityInformation( this, new Section(origin, shape));
++   }
++ 
++   public boolean supportsLocalityInformation() throws IOException {
++     return ncfile.supportsLocalityInformation();
++   }
++ 
++   /**
++    * Return an ArrayLong structure with the same shape as the shape arguement
++    * where each entry is the offset in the byte-stream where the corresponding
++    * data element begins.
++    *
++    * @param section list of Range specifying the section of data to read.
++    *                Must be null or same rank as variable.
++    *                If list is null, assume all data.
++    *                Each Range corresponds to a Dimension. If the Range object is null, it means use the entire dimension.
++    * @return a memory-resdient array of longs with offsets or -1 if the offset
++    *                for the corresponding cell can't be determined
++    */
++   public ArrayLong getLocalityInformation(Section section) throws IOException, InvalidRangeException {
++     return ncfile.getLocalityInformation(this, section);
++   }
++ 
++   /**
+     * Read data section specified by a "section selector", and return a memory resident Array. Uses
+     * Fortran 90 array section syntax.
+     *
+Only in ../netcdf2/cdm/: target
