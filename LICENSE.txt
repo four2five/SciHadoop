@@ -1,0 +1,2 @@
+All code in this project, unless otherwise stated, is GPLv2 licensed.
+If you are interested in another license, please contact me at buck@soe.ucsc.edu. 
