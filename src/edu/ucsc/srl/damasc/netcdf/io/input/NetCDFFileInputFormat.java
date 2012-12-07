@@ -307,7 +307,7 @@ public class NetCDFFileInputFormat
 
     long arraySize = array.getSize();
 
-    int sampleSize = (int) (arraySize * Utils.getSampleRatio(conf));
+    int sampleSize = Math.max(1, (int) (arraySize * Utils.getSampleRatio(conf)));
 
     int shape[] = array.getShape();
     int rank = array.getRank();
