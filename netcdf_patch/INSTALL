@@ -1,7 +1,9 @@
 March 6, 2013
 Joe Buck ( buck@soe.ucsc.edu )
 
-We've also added a patch for NetCDF Java 4.3.15 as netcdf43.diff
+We've also added a patch for NetCDF Java 4.3.15 as netcdf43.diff.
+from the "cdm" directory, apply the patch like so:
+ patch -p2 < netcdf43.diff 
 
 Nov 3, 2011
 Joe Buck ( buck@soe.ucsc.edu)
