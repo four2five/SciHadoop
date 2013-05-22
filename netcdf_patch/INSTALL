@@ -12,7 +12,7 @@ Joe Buck ( buck@soe.ucsc.edu)
 
 2) unzip the NetCDF source somewhere
 
-3) copy the netcdf42.diff file into the same directory as "cdm". 
+3) copy the netcdf42.diff file into the same directory as "cdm" (normally the "thredds directory"). 
 
 4) patch with this command 'patch -p1 < netcdf42.diff
 
